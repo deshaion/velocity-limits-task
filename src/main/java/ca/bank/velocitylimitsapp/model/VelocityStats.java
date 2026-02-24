@@ -7,7 +7,7 @@ import java.math.BigDecimal;
 
 @Builder
 @Getter
-public class AccountState {
+public class VelocityStats {
     private String customerId;
     private BigDecimal dailyTotalAmount;
     private BigDecimal weeklyTotalAmount;
