@@ -3,16 +3,16 @@ package ca.bank.velocitylimitsapp.repository;
 import ca.bank.velocitylimitsapp.model.VelocityStats;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
-import org.springframework.context.annotation.Import;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@JdbcTest
-@Import(VelocityRepository.class)
+@SpringBootTest
+@Transactional
 class VelocityRepositoryTest {
 
     @Autowired
