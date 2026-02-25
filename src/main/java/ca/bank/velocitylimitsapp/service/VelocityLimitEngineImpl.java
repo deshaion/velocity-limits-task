@@ -8,6 +8,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.Objects;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -16,6 +18,12 @@ public class VelocityLimitEngineImpl implements VelocityLimitEngine {
 
     @Override
     public Response process(Payload payload, VelocityStats velocityStats) {
+        if (!Objects.equals(payload.getCustomerId(), velocityStats.getCustomerId())) {
+            throw new IllegalArgumentException(
+                    String.format("Cannot process velocity limits: Customer ID %s does not match velocity stats ID %s.",
+                            payload.getCustomerId(), velocityStats.getCustomerId()));
+        }
+
         Response.ResponseBuilder responseBuilder = Response.builder()
                 .id(payload.getId())
                 .customerId(payload.getCustomerId());

@@ -17,9 +17,7 @@ public class CurrencyDeserializer extends JsonDeserializer<BigDecimal> {
             return null;
         }
 
-        String cleanValue = value.replace("$", "")
-                .replace(",", "")
-                .trim();
+        String cleanValue = value.replace("$", "").trim();
 
         return new BigDecimal(cleanValue);
     }

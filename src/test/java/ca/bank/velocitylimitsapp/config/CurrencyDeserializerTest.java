@@ -52,4 +52,11 @@ class CurrencyDeserializerTest {
         BigDecimal result = deserializer.deserialize(jsonParser, deserializationContext);
         assertNull(result);
     }
+
+    @Test
+    void testDeserializeEmptyAfterTrim() throws IOException {
+        when(jsonParser.getText()).thenReturn("   ");
+        BigDecimal result = deserializer.deserialize(jsonParser, deserializationContext);
+        assertNull(result);
+    }
 }

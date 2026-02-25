@@ -113,4 +113,59 @@ class VelocityLimitEngineImplTest {
 
         assertFalse(response.getAccepted());
     }
+
+    @Test
+    void testProcessCustomerIdMismatch() throws JsonProcessingException {
+        Payload payload = createPayload("1", "123", "$1000.00", "2022-01-01T12:00:00Z");
+        VelocityStats stats = VelocityStats.builder()
+                .customerId("999")
+                .dailyLoadCount(0)
+                .dailyTotalAmount(BigDecimal.ZERO)
+                .weeklyTotalAmount(new BigDecimal("1000.00"))
+                .build();
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> velocityLimitEngine.process(payload, stats));
+
+        assertEquals("Cannot process velocity limits: Customer ID 123 does not match velocity stats ID 999.", exception.getMessage());
+    }
+
+    @Test
+    void testProcessEqualToTotalDailyLimitAccepted() throws JsonProcessingException {
+        when(loadLimitProperties.getDailyCount()).thenReturn(3);
+        when(loadLimitProperties.getDailyAmount()).thenReturn(new BigDecimal("5000.00"));
+        when(loadLimitProperties.getWeeklyAmount()).thenReturn(new BigDecimal("20000.00"));
+
+        Payload payload = createPayload("1", "123", "$9.99", "2022-01-01T12:00:00Z");
+        VelocityStats stats = VelocityStats.builder()
+                .customerId("123")
+                .dailyLoadCount(0)
+                .dailyTotalAmount(new BigDecimal("4990.01"))
+                .weeklyTotalAmount(new BigDecimal("4990.01"))
+                .build();
+
+        Response response = velocityLimitEngine.process(payload, stats);
+
+        assertTrue(response.getAccepted());
+        assertEquals("1", response.getId());
+        assertEquals("123", response.getCustomerId());
+    }
+
+    @Test
+    void testProcessFailedExceedOneCent() throws JsonProcessingException {
+        when(loadLimitProperties.getDailyCount()).thenReturn(3);
+        when(loadLimitProperties.getDailyAmount()).thenReturn(new BigDecimal("5000.00"));
+        when(loadLimitProperties.getWeeklyAmount()).thenReturn(new BigDecimal("20000.00"));
+
+        Payload payload = createPayload("1", "123", "$9.99", "2022-01-01T12:00:00Z");
+        VelocityStats stats = VelocityStats.builder()
+                .customerId("123")
+                .dailyLoadCount(0)
+                .dailyTotalAmount(BigDecimal.ZERO)
+                .weeklyTotalAmount(new BigDecimal("19990.02"))
+                .build();
+
+        Response response = velocityLimitEngine.process(payload, stats);
+
+        assertFalse(response.getAccepted());
+    }
 }
